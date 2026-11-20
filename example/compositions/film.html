@@ -1,0 +1,822 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Bitcount Prop Single";
+      src: url("assets/fonts/bitcount.woff2") format("woff2");
+      font-weight: 700;
+      font-display: block;
+    }
+    @font-face {
+      font-family: "Geist";
+      src: url("assets/fonts/geist.woff2") format("woff2");
+      font-weight: 100 900;
+      font-display: block;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: #f04a00;
+      --ground: #eeeff1;
+      --paper: #f8f8f9;
+      --white: #ffffff;
+      --ink: #0d0d10;
+      --ink-soft: #4a4b52;
+      --line: #d4d5da;
+      --night: #0d0d10;
+      --night-line: #2c2d34;
+      --signal: #f04a00;
+      --signal-deep: #c23a00;
+      font-family: "Geist", system-ui, sans-serif;
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+    .pixel {
+      font-family: "Bitcount Prop Single", monospace;
+      font-weight: 700;
+      font-variation-settings: "ELSH" 50;
+    }
+    .mono {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+    }
+    .ch {
+      display: inline-block;
+      white-space: pre;
+      transform-origin: 50% 80%;
+    }
+
+    /* Camera: everything inside is laid out in frame pixels. */
+    #cam {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1080px;
+      height: 1080px;
+      transform-origin: 0 0;
+    }
+
+    /* The browser window, styled like the site's window component. */
+    #win {
+      position: absolute;
+      left: 60px;
+      top: 70px;
+      width: 960px;
+      height: 940px;
+      background: var(--paper);
+      outline: 2px solid var(--ink);
+      box-shadow: 0 40px 80px -36px rgb(13 13 16 / 0.6);
+    }
+    #bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      height: 48px;
+      background: var(--ink);
+    }
+    .sq {
+      position: absolute;
+      top: 19px;
+      width: 10px;
+      height: 10px;
+      background: var(--ink-soft);
+    }
+    #tab {
+      position: absolute;
+      left: 80px;
+      top: 8px;
+      width: 250px;
+      height: 40px;
+      background: var(--paper);
+    }
+    #tab-label {
+      position: absolute;
+      left: 40px;
+      top: 11px;
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    #tab-x {
+      position: absolute;
+      right: 14px;
+      top: 9px;
+      font-size: 16px;
+      color: var(--ink-soft);
+    }
+    #urlrow {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 48px;
+      height: 44px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+    #url {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      top: 7px;
+      height: 30px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      font-size: 14px;
+      color: var(--ink-soft);
+      padding: 5px 12px;
+      white-space: nowrap;
+    }
+    #url b {
+      color: var(--ink);
+      font-weight: 400;
+    }
+
+    /* The page inside the window. 960 x 848. */
+    #vp {
+      position: absolute;
+      left: 0;
+      top: 92px;
+      width: 960px;
+      height: 848px;
+      overflow: hidden;
+      background: var(--ground);
+    }
+    #meta {
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      top: 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--ink-soft);
+      opacity: 0;
+    }
+    #h1 {
+      position: absolute;
+      left: 36px;
+      top: 48px;
+      font-size: 64px;
+      line-height: 0.92;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    #h1 .accent {
+      color: var(--signal);
+    }
+    #floor {
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      top: 249px;
+      height: 2px;
+      background: var(--ink);
+      transform-origin: 50% 50%;
+    }
+
+    /* Placeholder that the hero smashes. */
+    #todo {
+      position: absolute;
+      left: 40px;
+      top: 64px;
+      width: 480px;
+      height: 128px;
+    }
+    #todo-box {
+      position: absolute;
+      inset: 0;
+      border: 2px dashed var(--ink-soft);
+    }
+    #todo-text {
+      position: absolute;
+      left: 26px;
+      top: 26px;
+      font-size: 44px;
+      color: var(--ink-soft);
+      white-space: nowrap;
+    }
+    #todo-note {
+      position: absolute;
+      left: 28px;
+      top: 84px;
+      font-size: 15px;
+      color: var(--ink-soft);
+    }
+
+    #dither {
+      position: absolute;
+      left: 0;
+      top: 250px;
+      width: 960px;
+      height: 64px;
+    }
+    #night {
+      position: absolute;
+      left: 0;
+      top: 314px;
+      width: 960px;
+      height: 210px;
+      background: var(--night);
+    }
+    .row {
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      height: 70px;
+      border-bottom: 1px solid var(--night-line);
+    }
+    .row .dot {
+      position: absolute;
+      left: 0;
+      top: 30px;
+      width: 10px;
+      height: 10px;
+      background: var(--signal);
+    }
+    .row .name {
+      position: absolute;
+      left: 24px;
+      top: 16px;
+      font-size: 34px;
+      color: var(--white);
+      white-space: nowrap;
+    }
+    .row .tag {
+      position: absolute;
+      top: 24px;
+      background: var(--white);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
+
+    #orange {
+      position: absolute;
+      left: 0;
+      top: 524px;
+      width: 960px;
+      height: 324px;
+    }
+    #orange canvas {
+      position: absolute;
+      inset: 0;
+    }
+    #ask {
+      position: absolute;
+      left: 40px;
+      top: 26px;
+      font-size: 34px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    #sky {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 960px;
+      height: 226px;
+    }
+
+    /* The hero: the favicon "S", drawn in square pixels. */
+    #hero {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 0;
+      z-index: 10;
+    }
+    #hero-size {
+      position: absolute;
+      left: -52px;
+      top: -104px;
+      width: 104px;
+      height: 104px;
+      transform-origin: 52px 104px;
+    }
+    #hero-spin {
+      position: absolute;
+      inset: 0;
+      transform-origin: 52px 56px;
+    }
+    #hero-body {
+      position: absolute;
+      inset: 0;
+      transform-origin: 52px 104px;
+    }
+    #hero svg {
+      display: block;
+      overflow: visible;
+    }
+
+    #arrow {
+      position: absolute;
+      left: 206px;
+      top: 128px;
+      opacity: 0;
+    }
+    #cap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 58px;
+      text-align: center;
+    }
+    #cap-line {
+      font-size: 66px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    #cap-sub {
+      margin-top: 14px;
+      font-size: 22px;
+      font-weight: 600;
+      opacity: 0;
+    }
+  </style>
+
+  <div id="root" data-composition-id="film" data-width="1080" data-height="1080">
+    <div id="cam">
+      <div id="win">
+        <div id="bar" data-layout-ignore>
+          <div class="sq" style="right: 52px"></div>
+          <div class="sq" style="right: 36px"></div>
+          <div class="sq" style="right: 20px; background: var(--signal)"></div>
+          <div id="tab">
+            <div id="tab-label">New Tab</div>
+            <div id="tab-x">×</div>
+          </div>
+        </div>
+        <div id="urlrow" data-layout-ignore><div id="url" class="mono">localhost:3000</div></div>
+
+        <div id="vp">
+          <div id="meta" data-layout-ignore>
+            <span>Kris Sørensen, independent software developer</span>
+            <span>Tallinn, Estonia <span class="mono">23:48</span></span>
+          </div>
+          <div id="h1" class="pixel" data-layout-allow-overlap>
+            <div id="h1-a"></div>
+            <div id="h1-b"></div>
+            <div id="h1-c" class="accent"></div>
+          </div>
+          <div id="floor"></div>
+
+          <div id="todo" data-layout-allow-overlap>
+            <div id="todo-box"></div>
+            <div id="todo-text" class="pixel"></div>
+            <div id="todo-note" class="mono">// TODO: build the website</div>
+          </div>
+
+          <canvas id="dither" width="960" height="64"></canvas>
+          <div id="night" data-layout-ignore>
+            <div class="row" id="row-0" style="top: 0">
+              <div class="dot"></div>
+              <div class="name pixel">Din Firmaadresse</div>
+              <div class="tag" style="left: 380px">120+ active customers every month</div>
+            </div>
+            <div class="row" id="row-1" style="top: 70px">
+              <div class="dot"></div>
+              <div class="name pixel">Din Virksomhedsportal</div>
+              <div class="tag" style="left: 480px">Used by 400+ client businesses</div>
+            </div>
+            <div class="row" id="row-2" style="top: 140px">
+              <div class="dot"></div>
+              <div class="name pixel">Cannamor</div>
+              <div class="tag" style="left: 230px">Launching soon</div>
+            </div>
+          </div>
+
+          <div id="orange">
+            <canvas id="flood" width="960" height="324"></canvas>
+            <div id="ask" class="pixel"></div>
+            <svg
+              id="sky"
+              viewBox="0 0 272 64"
+              preserveAspectRatio="none"
+              shape-rendering="crispEdges"
+            >
+              <g id="sky-shapes" fill="#0d0d10"></g>
+              <g id="sky-windows" fill="#f04a00"></g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div id="hero">
+        <div id="hero-size">
+          <div id="hero-spin">
+            <div id="hero-body">
+              <svg id="hero-svg" width="104" height="104" viewBox="0 0 104 104" shape-rendering="crispEdges">
+                <g id="hero-outline" fill="#0d0d10"></g>
+                <g id="hero-px" fill="#f04a00"></g>
+                <g id="hero-legs" fill="#0d0d10"></g>
+                <g id="hero-eyes" fill="#0d0d10">
+                  <rect x="48" y="4" width="8" height="12"></rect>
+                  <rect x="72" y="4" width="8" height="12"></rect>
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <svg id="arrow" width="30" height="62" viewBox="0 0 30 62" shape-rendering="crispEdges">
+      <g fill="#0d0d10">
+        <rect x="12" y="0" width="6" height="44"></rect>
+        <rect x="0" y="44" width="30" height="6"></rect>
+        <rect x="6" y="50" width="18" height="6"></rect>
+        <rect x="12" y="56" width="6" height="6"></rect>
+      </g>
+    </svg>
+    <div id="cap">
+      <div id="cap-line" class="pixel"></div>
+      <div id="cap-sub">solidinput.eu</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const DUR = 13.5;
+      const $ = (id) => document.getElementById(id);
+
+      // ---------- helpers ----------
+      const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+      const lerp = (a, b, u) => a + (b - a) * u;
+      const eio = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+      const eout = (u) => 1 - Math.pow(1 - u, 3);
+      function hash(x, y, seed) {
+        let h = (x * 374761393 + y * 668265263 + seed * 2246822519) | 0;
+        h = Math.imul(h ^ (h >>> 13), 1274126177);
+        return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+      }
+      function bounceOut(u) {
+        const n = 7.5625, d = 2.75;
+        if (u < 1 / d) return n * u * u;
+        if (u < 2 / d) return n * (u -= 1.5 / d) * u + 0.75;
+        if (u < 2.5 / d) return n * (u -= 2.25 / d) * u + 0.9375;
+        return n * (u -= 2.625 / d) * u + 0.984375;
+      }
+      // Piecewise-linear keys [[t, v...]] -> values at t.
+      function keys(list, t) {
+        if (t <= list[0][0]) return list[0].slice(1);
+        for (let i = 1; i < list.length; i++) {
+          if (t <= list[i][0]) {
+            const a = list[i - 1], b = list[i];
+            const u = eio((t - a[0]) / (b[0] - a[0]));
+            return a.slice(1).map((v, k) => lerp(v, b[k + 1], u));
+          }
+        }
+        return list[list.length - 1].slice(1);
+      }
+      function splitChars(el, text) {
+        el.innerHTML = "";
+        return [...text].map((c) => {
+          const s = document.createElement("span");
+          s.className = "ch";
+          s.textContent = c;
+          el.appendChild(s);
+          return s;
+        });
+      }
+
+      // ---------- the pixel S ----------
+      // Rasterise the favicon outline (public/icon.svg) into 8-unit cells.
+      (function buildHero() {
+        const path = new Path2D(
+          "M95 0V26H32V36H81L100 52V69L74 94H0V66H64V75L79 60L64 45V55H17L0 41V24L26 0Z",
+        );
+        const c = document.createElement("canvas").getContext("2d");
+        const g = $("hero-px");
+        let svg = "";
+        for (let y = 0; y < 12; y++) {
+          for (let x = 0; x < 13; x++) {
+            const cx = x * 8 + 4, cy = y * 8 + 4;
+            if (c.isPointInPath(path, cx, cy * (94 / 96))) {
+              svg += `<rect x="${x * 8}" y="${y * 8}" width="8" height="8"/>`;
+            }
+          }
+        }
+        g.innerHTML = svg;
+        // A 4-unit ink outline, so the S still reads on orange after the camouflage joke.
+        $("hero-outline").innerHTML = svg.replace(/x="(\d+)" y="(\d+)" width="8" height="8"/g,
+          (m, x, y) => `x="${+x - 4}" y="${+y - 4}" width="16" height="16"`);
+        $("hero-legs").innerHTML =
+          '<rect x="16" y="96" width="8" height="8"/><rect x="48" y="96" width="8" height="8"/>';
+      })();
+
+      // ---------- page content ----------
+      const todoChars = splitChars($("todo-text"), "Under construction");
+      const h1a = splitChars($("h1-a"), "Turn complex");
+      const h1b = splitChars($("h1-b"), "workflows into");
+      const h1c = splitChars($("h1-c"), "useful software.");
+      const askChars = splitChars($("ask"), "What should we build next?");
+      const capWords = ["Built", "by", "a", "16px", "favicon."].map((w, i, all) => {
+        const s = document.createElement("span");
+        s.className = "ch";
+        s.textContent = w + (i < all.length - 1 ? " " : "");
+        $("cap-line").appendChild(s);
+        return s;
+      });
+      const rows = [0, 1, 2].map((i) => $("row-" + i));
+
+      // Skyline of Tallinn Old Town, copied from src/components/ui/Skyline.tsx.
+      (function buildSky() {
+        const H = 64;
+        const R = [];
+        const tower = (x, w, body, roof, step = 1) => {
+          R.push([x, H - body, w, body]);
+          let width = w, left = x;
+          for (let row = 1; row <= roof && width > 0; row++) {
+            if (row % step === 0) { left += 1; width -= 2; }
+            if (width <= 0) break;
+            R.push([left, H - body - row, width, 1]);
+          }
+        };
+        const gable = (x, w, body) => {
+          R.push([x, H - body, w, body]);
+          let left = x, width = w, top = H - body;
+          while (width > 2) { left += 1; width -= 2; top -= 2; R.push([left, top, width, 2]); }
+        };
+        const wall = (x, w, h) => {
+          R.push([x, H - h, w, h]);
+          for (let c = x; c < x + w; c += 3) R.push([c, H - h - 1, 2, 1]);
+        };
+        wall(0, 22, 9); tower(4, 7, 20, 9); gable(22, 9, 15); gable(31, 7, 12);
+        tower(38, 9, 30, 3); R.push([40, H - 33, 5, 4], [41, H - 47, 3, 14], [42, H - 60, 1, 13]);
+        gable(47, 11, 16); wall(58, 18, 10); tower(62, 7, 22, 10); gable(76, 8, 14);
+        gable(84, 10, 18); tower(94, 6, 26, 14, 2); gable(100, 9, 13); wall(109, 20, 8);
+        tower(113, 8, 18, 8); gable(129, 12, 17); gable(141, 8, 12); wall(149, 26, 14);
+        tower(154, 9, 34, 0);
+        [0, 2, 4, 6, 8].forEach((c) => R.push([154 + c, H - 36, 1, 2]));
+        R.push([158, H - 44, 1, 8]);
+        tower(168, 7, 24, 11); gable(175, 10, 15); gable(185, 8, 11); tower(193, 8, 28, 18, 2);
+        gable(201, 11, 16); wall(212, 18, 9); tower(216, 7, 19, 9); gable(230, 9, 13);
+        gable(239, 12, 17); wall(251, 21, 10); tower(258, 7, 21, 10);
+        $("sky-shapes").innerHTML = R.map(([x, y, w, h]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}"/>`).join("");
+        const W = [
+          [6, 16], [24, 11], [27, 8], [41, 24], [43, 16], [50, 12], [54, 9], [64, 17], [79, 10],
+          [87, 14], [90, 8], [96, 20], [103, 9], [116, 13], [132, 13], [136, 9], [157, 27],
+          [160, 20], [170, 18], [178, 11], [196, 22], [204, 12], [208, 8], [218, 14], [233, 9],
+          [242, 13], [246, 8], [260, 15],
+        ];
+        $("sky-windows").innerHTML = W.map(([x, y]) => `<rect x="${x}" y="${H - y}" width="1" height="2"/>`).join("");
+      })();
+      const skyWindows = [...$("sky-windows").children];
+      const windowOrder = skyWindows.map((_, i) => i).sort((a, b) => hash(a, 7, 3) - hash(b, 7, 3));
+      const windowRank = [];
+      windowOrder.forEach((w, rank) => (windowRank[w] = rank));
+
+      // ---------- the hero's path ----------
+      // Frame pixels. The page (viewport) starts at frame (60, 162).
+      const V = (x, y) => ({ x: 60 + x, y: 162 + y });
+      const TAB = { x: 160, y: 106 };
+      const P1 = V(520, 249), P2 = V(860, 249), P3 = V(700, 249);
+      const R1 = V(790, 384), R2 = V(860, 454), R3 = V(780, 524);
+      const O = V(760, 690);
+      const T = V(559, 721); // the merlons of Tall Hermann
+      const SMALL = 0.155;
+      // t0 = take-off, t1 = landing (on the beat, 120 BPM).
+      const HOPS = [
+        { t0: 1.5, t1: 2.0, a: TAB, b: P1, h: 220, s0: SMALL, s1: 1, crouch: 0.3 },
+        { t0: 2.5, t1: 3.0, a: P1, b: P1, h: 70 },
+        { t0: 3.5, t1: 4.0, a: P1, b: P2, h: 110 },
+        { t0: 4.5, t1: 5.0, a: P2, b: P3, h: 210, spin: -360 },
+        { t0: 5.5, t1: 6.0, a: P3, b: R1, h: 80 },
+        { t0: 6.1, t1: 6.5, a: R1, b: R2, h: 70 },
+        { t0: 6.6, t1: 7.0, a: R2, b: R3, h: 70 },
+        { t0: 7.5, t1: 8.0, a: R3, b: O, h: 110 },
+        { t0: 9.0, t1: 9.5, a: O, b: T, h: 150 },
+        { t0: 10.05, t1: 10.75, a: T, b: TAB, h: 120, s0: 1, s1: SMALL, spin: 360 },
+      ];
+      const BLINKS = [2.35, 4.3, 7.3, 8.62, 9.75, 11.4, 12.3];
+      const LOOK = [
+        [0, 0, 0], [2.05, 0, 0], [2.15, -6, 0], [2.3, -6, 0], [2.4, 6, 0], [2.55, 0, 0],
+        [8.35, 0, 0], [8.45, -6, 0], [8.6, -6, 0], [8.7, 6, 0], [8.85, 0, 0],
+        [9.55, 0, 0], [9.65, 0, 4], [9.95, 0, 4], [10.05, 0, 0],
+      ];
+
+      function heroAt(t) {
+        let x = TAB.x, y = TAB.y, size = SMALL, rot = 0, sy = 1;
+        let lastLand = -9, next = null, air = null;
+        for (const h of HOPS) {
+          if (t >= h.t1) { lastLand = h.t1; x = h.b.x; y = h.b.y; size = h.s1 ?? size; }
+          else if (t >= h.t0) { air = h; break; }
+          else { next = h; break; }
+        }
+        if (air) {
+          const u = (t - air.t0) / (air.t1 - air.t0);
+          x = lerp(air.a.x, air.b.x, u);
+          y = lerp(air.a.y, air.b.y, u) - air.h * 4 * u * (1 - u);
+          size = lerp(air.s0 ?? size, air.s1 ?? size, eio(u));
+          rot = (air.spin || 0) * eio(u);
+          sy *= 1 + 0.18 * Math.max(0, 1 - u / 0.35) + 0.1 * Math.max(0, (u - 0.75) / 0.25);
+        }
+        // Landing: a damped squash.
+        const d = t - lastLand;
+        if (d >= 0 && d < 0.7) sy *= 1 - 0.3 * Math.exp(-d * 7) * Math.cos(d * 26);
+        // Anticipation: crouch before take-off.
+        if (next) {
+          const win = next.crouch || 0.14;
+          const a = next.t0 - t;
+          if (a > 0 && a < win) { const k = 1 - a / win; sy *= 1 - 0.26 * k * k; }
+        }
+        // Knocks inside the tab, on the first two beats.
+        for (const b of [0.25, 0.75]) {
+          const q = t - b + 0.14;
+          if (q > 0 && q < 0.28) rot = 16 * Math.sin((q / 0.28) * Math.PI * 4) * (1 - q / 0.28);
+        }
+        // Balancing on the tower.
+        if (t > 9.5 && t < 10.0) rot = 9 * Math.sin((t - 9.5) * 20) * Math.exp(-(t - 9.5) * 3);
+        return { x, y, size, rot, sy, sx: Math.pow(sy, -0.6) };
+      }
+
+      // ---------- camera ----------
+      function follow(h) {
+        const s = 1.03;
+        return [540 + 0.1 * (h.x - 540), 540 + 0.1 * (h.y - 540), s];
+      }
+      function camAt(t, h) {
+        const ZOOM = [330, 250, 2.1];
+        const ZOOM2 = [330, 250, 2.22];
+        const END = [540, 480, 0.84];
+        if (t < 1.3) return ZOOM.map((v, i) => lerp(v, ZOOM2[i], t / 1.3));
+        if (t < 2.05) {
+          const f = follow(heroAt(2.05));
+          const u = eio((t - 1.3) / 0.75);
+          return ZOOM2.map((v, i) => lerp(v, f[i], u));
+        }
+        if (t < 10.7) return follow(h);
+        const f = follow(heroAt(10.7));
+        const u = eio(clamp((t - 10.7) / 0.8));
+        return f.map((v, i) => lerp(v, END[i], u));
+      }
+
+      // ---------- canvases ----------
+      const BAYER = [
+        [0, 32, 8, 40, 2, 34, 10, 42], [48, 16, 56, 24, 50, 18, 58, 26],
+        [12, 44, 4, 36, 14, 46, 6, 38], [60, 28, 52, 20, 62, 30, 54, 22],
+        [3, 35, 11, 43, 1, 33, 9, 41], [51, 19, 59, 27, 49, 17, 57, 25],
+        [15, 47, 7, 39, 13, 45, 5, 37], [63, 31, 55, 23, 61, 29, 53, 21],
+      ];
+      const dctx = $("dither").getContext("2d");
+      function drawDither(progress) {
+        dctx.clearRect(0, 0, 960, 64);
+        if (progress <= 0) return;
+        const cell = 8, cols = 120, rowsN = 8;
+        for (let y = 0; y < rowsN; y++) {
+          const depth = (y + 0.5) / rowsN;
+          for (let x = 0; x < cols; x++) {
+            const noise = hash(x, y, 4);
+            const threshold = (BAYER[y % 8][x % 8] + 0.5) / 64;
+            const value = depth * 1.6 - 0.3 + (noise - 0.5) * 0.5;
+            const reveal = progress * 1.6 - (1 - value) * 0.6;
+            if (value > threshold && reveal > noise * 0.4) dctx.fillStyle = "#0d0d10";
+            else if (Math.abs(value - threshold) < 0.035 && noise > 0.55 && progress > 0.3) dctx.fillStyle = "#f04a00";
+            else continue;
+            dctx.fillRect(x * cell, y * cell, cell, cell);
+          }
+        }
+      }
+      const fctx = $("flood").getContext("2d");
+      function drawFlood(p) {
+        fctx.clearRect(0, 0, 960, 324);
+        if (p <= 0) return;
+        const cell = 12;
+        const ox = 760, oy = 690 - 524;
+        const maxD = Math.hypot(760, 324);
+        fctx.fillStyle = "#f04a00";
+        for (let y = 0; y < 27; y++) {
+          for (let x = 0; x < 80; x++) {
+            const d = Math.hypot(x * cell + 6 - ox, y * cell + 6 - oy) / maxD;
+            if (d < p * 1.25 - hash(x, y, 9) * 0.25) fctx.fillRect(x * cell, y * cell, cell, cell);
+          }
+        }
+      }
+
+      // ---------- render one frame from time alone ----------
+      function render(t) {
+        const h = heroAt(t);
+
+        // Hero transforms (no GSAP on these elements).
+        $("hero").style.transform = `translate(${h.x}px, ${h.y}px)`;
+        $("hero-size").style.transform = `scale(${h.size})`;
+        $("hero-spin").style.transform = `rotate(${h.rot}deg)`;
+        $("hero-body").style.transform = `scale(${h.sx}, ${h.sy})`;
+        const [lx, ly] = keys(LOOK, t);
+        let eye = t < 1.0 ? 0.08 : t < 1.12 ? lerp(0.08, 1, (t - 1.0) / 0.12) : 1;
+        for (const b of BLINKS) if (Math.abs(t - b) < 0.06) eye = 0.12;
+        $("hero-eyes").setAttribute("transform", `translate(${lx} ${ly + 10}) scale(1 ${eye}) translate(0 -10)`);
+        $("hero-legs").style.opacity = t < 1.45 ? 0 : 1;
+        // Outline switches on after the camouflage joke, with a short flicker.
+        const ol = t < 8.9 ? 0 : t < 8.96 ? 1 : t < 9.0 ? 0 : 1;
+        $("hero-outline").style.opacity = ol;
+
+        // Camera.
+        const [fx, fy, s] = camAt(t, h);
+        $("cam").style.transform = `translate(${540 - s * fx}px, ${540 - s * fy}px) scale(${s})`;
+
+        // Tab and address bar ship at the end.
+        const shipped = t >= 10.75;
+        $("tab-label").textContent = shipped ? "Solidinput" : "New Tab";
+        $("url").innerHTML = shipped ? "https://www.<b>solidinput.eu</b>" : "localhost:3000";
+
+        // The placeholder shatters as the hero crashes through it.
+        const SHATTER = 1.93;
+        const dt = t - SHATTER;
+        todoChars.forEach((el, i) => {
+          if (dt <= 0) { el.style.transform = "none"; return; }
+          const vx = (hash(i, 1, 2) - 0.25) * 520;
+          const vy = -(160 + hash(i, 2, 2) * 380);
+          const r = (hash(i, 3, 2) - 0.5) * 900;
+          el.style.transform = `translate(${vx * dt}px, ${vy * dt + 1300 * dt * dt}px) rotate(${r * dt}deg)`;
+        });
+        const fall = (el, k) => {
+          el.style.transform = dt <= 0 ? "none"
+            : `translate(${k * 120 * dt}px, ${-120 * dt + 1300 * dt * dt}px) rotate(${k * 40 * dt}deg)`;
+        };
+        fall($("todo-box"), 1);
+        fall($("todo-note"), -1);
+
+        // The floor line draws out from the landing.
+        const fl = eout(clamp((t - 2.0) / 0.25));
+        $("floor").style.transform = `scaleX(${fl})`;
+        $("floor").style.transformOrigin = `${520 - 40}px 50%`;
+
+        // Headline: lines 1-2 type on the stomp, line 3 drops in on the next landing.
+        $("meta").style.opacity = clamp((t - 3.0) / 0.2);
+        [...h1a, ...h1b].forEach((el, i) => {
+          const d = t - (3.0 + i * 0.018);
+          el.style.opacity = d < 0 ? 0 : 1;
+          el.style.transform = d < 0 ? "none" : `scale(${d < 0.08 ? lerp(1.5, 1, d / 0.08) : 1})`;
+        });
+        h1c.forEach((el, i) => {
+          const d = t - (4.0 + i * 0.022);
+          el.style.opacity = d < 0 ? 0 : 1;
+          el.style.transform = `translateY(${d < 0 ? -80 : -80 * (1 - bounceOut(clamp(d / 0.32)))}px)`;
+          el.style.fontVariationSettings = `"ELSH" ${lerp(0, 50, clamp((d - 0.1) / 0.35))}`;
+        });
+
+        // Ground pound: dither seam, then the night band fills downward in 8px steps.
+        drawDither(clamp((t - 5.0) / 0.45));
+        const q = clamp((t - 5.2) / 0.3);
+        const hidden = Math.ceil((210 * (1 - q)) / 8) * 8;
+        $("night").style.clipPath = `inset(0 0 ${hidden}px 0)`;
+
+        // Project rows light up as the hero lands in each.
+        [6.0, 6.5, 7.0].forEach((lt, i) => {
+          const d = t - lt;
+          const row = rows[i];
+          const dot = row.querySelector(".dot"), name = row.querySelector(".name"), tag = row.querySelector(".tag");
+          dot.style.opacity = d < 0 ? 0 : 1;
+          dot.style.transform = `scale(${d < 0 ? 0 : lerp(2.2, 1, eout(clamp(d / 0.15)))})`;
+          name.style.opacity = d < 0 ? 0 : 1;
+          name.style.transform = `translateX(${d < 0 ? -16 : -16 * (1 - eout(clamp(d / 0.2)))}px)`;
+          name.style.fontVariationSettings = `"ELSH" ${lerp(0, 50, clamp(d / 0.4))}`;
+          const dt2 = d - 0.12;
+          tag.style.opacity = dt2 < 0 ? 0 : 1;
+          tag.style.transform = `scale(${dt2 < 0 ? 0.6 : lerp(1.25, 1, eout(clamp(dt2 / 0.15)))})`;
+        });
+
+        // Orange flood from the landing point, then the question.
+        drawFlood(clamp((t - 8.0) / 0.4));
+        askChars.forEach((el, i) => {
+          const d = t - (8.25 + i * 0.012);
+          el.style.opacity = d < 0 ? 0 : 1;
+          el.style.transform = `translateY(${d < 0 ? 12 : 12 * (1 - eout(clamp(d / 0.12)))}px)`;
+        });
+
+        // Skyline rises row by row, then its windows light up.
+        const sk = clamp((t - 9.0) / 0.3);
+        const rowsHidden = Math.round((1 - sk) * 64);
+        $("sky").style.transform = `translateY(${rowsHidden * (226 / 64)}px)`;
+        skyWindows.forEach((w, i) => {
+          w.style.opacity = t >= 9.5 + windowRank[i] * 0.017 ? 1 : 0;
+        });
+
+        // End line.
+        capWords.forEach((el, i) => {
+          const d = t - (11.05 + i * 0.1);
+          el.style.opacity = d < 0 ? 0 : 1;
+          el.style.transform = `translateY(${d < 0 ? 20 : 20 * (1 - eout(clamp(d / 0.18)))}px)`;
+          el.style.fontVariationSettings = `"ELSH" ${lerp(0, 50, clamp(d / 0.35))}`;
+        });
+        const ad = t - 11.9;
+        $("arrow").style.opacity = ad < 0 ? 0 : 1;
+        $("arrow").style.transform = `translateY(${ad < 0 ? -30 : -30 * (1 - bounceOut(clamp(ad / 0.4)))}px)`;
+        $("cap-sub").style.opacity = clamp((t - 11.7) / 0.25);
+      }
+
+      // Drive everything from one paused GSAP tween, so every frame is a function of time.
+      const clock = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(clock, { t: 0 }, { t: DUR, duration: DUR, ease: "none", onUpdate: () => render(clock.t) }, 0);
+      render(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["film"] = tl;
+    })();
+  </script>
+</template>

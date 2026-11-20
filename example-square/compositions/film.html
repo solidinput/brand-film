@@ -1,0 +1,1278 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Outfit";
+      src: url("assets/fonts/outfit.woff2") format("woff2");
+      font-weight: 100 900;
+      font-display: block;
+    }
+    @font-face {
+      font-family: "InterF";
+      src: url("assets/fonts/inter.woff2") format("woff2");
+      font-weight: 100 900;
+      font-display: block;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      /* Din Firmaadresse tokens (apps/virtualoffice/DESIGN.md, Tailwind equivalents). */
+      --seal: #f59e0b;
+      --amber-deep: #d97706;
+      --amber-ink: #b45309;
+      --amber-ink-deep: #92400e;
+      --amber-on-wash: #451a03;
+      --amber-wash: #fffbeb;
+      --amber-tint: #fef3c7;
+      --amber-line: #fde68a;
+      --ink: #020617;
+      --navy: #0f172a;
+      --body: #334155;
+      --muted: #475569;
+      --meta: #64748b;
+      --line-strong: #cbd5e1;
+      --line: #e2e8f0;
+      --mist: #f8fafc;
+      --paper: #ffffff;
+      --desk: #f7f7f5;
+      --desk-side: #f4f3ef;
+      --green: #059669;
+      --green-ink: #047857;
+      --green-wash: #ecfdf5;
+      background:
+        radial-gradient(900px 700px at 100% 0%, #fdf1cf 0%, rgba(253, 241, 207, 0) 70%),
+        var(--desk);
+      font-family: "InterF", "Inter", system-ui, sans-serif;
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+    .outfit {
+      font-family: "Outfit", sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+    .mono {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+    }
+    .ch {
+      display: inline-block;
+      white-space: pre;
+      transform-origin: 50% 80%;
+    }
+    .abs {
+      position: absolute;
+    }
+
+    #cam {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1080px;
+      height: 1080px;
+      transform-origin: 0 0;
+    }
+
+    /* ---------- browser window ---------- */
+    #win {
+      position: absolute;
+      left: 70px;
+      top: 330px;
+      width: 940px;
+      height: 1180px;
+      background: var(--desk);
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 50px 100px -40px rgb(15 23 42 / 0.45), 0 2px 6px rgb(15 23 42 / 0.06);
+    }
+    #bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      height: 56px;
+      background: #ebe9e3;
+    }
+    .dot3 {
+      position: absolute;
+      top: 22px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--line-strong);
+    }
+    #tab {
+      position: absolute;
+      left: 96px;
+      top: 10px;
+      width: 340px;
+      height: 46px;
+      background: var(--paper);
+      border-radius: 12px 12px 0 0;
+    }
+    #tab-label {
+      position: absolute;
+      left: 52px;
+      top: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      white-space: nowrap;
+      color: var(--body);
+    }
+    #tab-x {
+      position: absolute;
+      right: 16px;
+      top: 10px;
+      font-size: 20px;
+      color: var(--meta);
+    }
+    #tab-badge {
+      position: absolute;
+      left: 34px;
+      top: 7px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--green);
+      border: 2px solid var(--paper);
+      opacity: 0;
+    }
+    #urlrow {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 56px;
+      height: 50px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+    #url {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 8px;
+      height: 34px;
+      background: var(--mist);
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      font-size: 17px;
+      color: var(--meta);
+      padding: 6px 16px;
+      white-space: nowrap;
+    }
+    #url b {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    /* ---------- page viewport: 940 x 1074 ---------- */
+    #vp {
+      position: absolute;
+      left: 0;
+      top: 106px;
+      width: 940px;
+      height: 1074px;
+      overflow: hidden;
+      background: var(--desk);
+    }
+
+    /* Placeholder the hero smashes. */
+    #skel {
+      position: absolute;
+      left: 150px;
+      top: 110px;
+      width: 640px;
+      height: 620px;
+    }
+    #skel-card {
+      position: absolute;
+      inset: 0;
+      background: var(--paper);
+      border: 2px dashed var(--line-strong);
+      border-radius: 16px;
+    }
+    .bone {
+      position: absolute;
+      left: 48px;
+      height: 26px;
+      border-radius: 13px;
+      background: #eef1f5;
+    }
+    #skel-text {
+      position: absolute;
+      left: 48px;
+      top: 44px;
+      font-size: 44px;
+      font-weight: 600;
+      color: var(--meta);
+      white-space: nowrap;
+    }
+
+    /* Login card. */
+    #login {
+      position: absolute;
+      left: 150px;
+      top: 110px;
+      width: 640px;
+      height: 620px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 20px 40px -24px rgb(15 23 42 / 0.25);
+      opacity: 0;
+    }
+    .label {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    #login-eyebrow {
+      position: absolute;
+      left: 48px;
+      top: 48px;
+      color: var(--amber-ink);
+    }
+    #login-h {
+      position: absolute;
+      left: 46px;
+      top: 76px;
+      font-size: 64px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .flabel {
+      position: absolute;
+      left: 48px;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--body);
+    }
+    .field {
+      position: absolute;
+      left: 48px;
+      right: 48px;
+      height: 70px;
+      border: 1.5px solid var(--line-strong);
+      border-radius: 10px;
+      background: var(--paper);
+      padding: 18px 18px;
+      font-size: 28px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    #btn {
+      position: absolute;
+      left: 48px;
+      right: 48px;
+      top: 480px;
+      height: 84px;
+      border-radius: 12px;
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 30px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 84px;
+      transform-origin: 50% 100%;
+    }
+
+    /* Dashboard. */
+    #dash {
+      position: absolute;
+      inset: 0;
+      background: var(--desk);
+    }
+    #side {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 270px;
+      height: 1074px;
+      background: var(--desk-side);
+      border-right: 1px solid var(--line);
+    }
+    #co {
+      position: absolute;
+      left: 18px;
+      top: 24px;
+      width: 234px;
+      height: 84px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    #co-name {
+      position: absolute;
+      left: 15px;
+      top: 31px;
+      font-size: 16px; letter-spacing: -0.01em;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    #co-sub {
+      position: absolute;
+      left: 18px;
+      top: 48px;
+      font-size: 16px;
+      color: var(--meta);
+    }
+    #ws {
+      position: absolute;
+      left: 22px;
+      top: 136px;
+      color: var(--meta);
+      font-size: 13px;
+    }
+    #nav-hi {
+      position: absolute;
+      left: 14px;
+      width: 242px;
+      height: 56px;
+      background: var(--paper);
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgb(15 23 42 / 0.08);
+    }
+    #nav-bar {
+      position: absolute;
+      left: 14px;
+      width: 4px;
+      height: 32px;
+      border-radius: 2px;
+      background: var(--seal);
+    }
+    .nav {
+      position: absolute;
+      left: 14px;
+      width: 242px;
+      height: 56px;
+    }
+    .nav svg {
+      position: absolute;
+      left: 18px;
+      top: 16px;
+    }
+    .nav span {
+      position: absolute;
+      left: 54px;
+      top: 15px;
+      font-size: 21px;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .nav.on span {
+      color: var(--ink);
+    }
+
+    #main-h {
+      position: absolute;
+      left: 302px;
+      top: 30px;
+    }
+    #co-label {
+      color: var(--amber-ink);
+      font-size: 14px;
+    }
+    #welcome {
+      margin-top: 8px;
+      font-size: 44px;
+      line-height: 1.05;
+      white-space: nowrap;
+    }
+    #intro {
+      margin-top: 10px;
+      width: 470px;
+      font-size: 19px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    #status {
+      position: absolute;
+      left: 302px;
+      top: 196px;
+      width: 578px;
+      height: 96px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .cell {
+      position: absolute;
+      top: 0;
+      width: 192px;
+      height: 96px;
+    }
+    .cell + .cell {
+      border-left: 1px solid var(--line);
+    }
+    .cell .ico {
+      position: absolute;
+      left: 16px;
+      top: 30px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--mist);
+      border: 1.5px solid var(--line-strong);
+    }
+    .cell .ico svg {
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      opacity: 0;
+    }
+    .cell .k {
+      position: absolute;
+      left: 64px;
+      top: 24px;
+      font-size: 14px;
+      color: var(--meta);
+      white-space: nowrap;
+    }
+    .cell .v {
+      position: absolute;
+      left: 64px;
+      top: 44px;
+      font-size: 22px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .panel {
+      position: absolute;
+      left: 302px;
+      top: 320px;
+      width: 578px;
+      height: 720px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .p-title {
+      position: absolute;
+      left: 28px;
+      top: 26px;
+      font-size: 38px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .p-sub {
+      position: absolute;
+      left: 28px;
+      top: 74px;
+      font-size: 18px;
+      color: var(--meta);
+      white-space: nowrap;
+    }
+    #empty {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 250px;
+      text-align: center;
+    }
+    #empty-h {
+      font-size: 30px;
+      font-weight: 700;
+      margin-top: 18px;
+    }
+    #empty-p {
+      font-size: 19px;
+      color: var(--meta);
+      margin-top: 8px;
+    }
+    .mrow {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 130px;
+      border-top: 1px solid var(--line);
+    }
+    .mrow .tile {
+      position: absolute;
+      left: 28px;
+      top: 33px;
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      background: var(--amber-wash);
+      border: 1px solid var(--amber-line);
+      color: var(--amber-deep);
+    }
+    .mrow .tile svg {
+      position: absolute;
+      left: 16px;
+      top: 16px;
+    }
+    .mrow .who {
+      position: absolute;
+      left: 112px;
+      top: 34px;
+      font-size: 29px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .mrow .what {
+      position: absolute;
+      left: 112px;
+      top: 74px;
+      font-size: 18px;
+      color: var(--meta);
+      white-space: nowrap;
+    }
+    .pill {
+      position: absolute;
+      right: 26px;
+      top: 46px;
+      height: 38px;
+      padding: 0 16px;
+      border-radius: 19px;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 38px;
+      white-space: nowrap;
+    }
+    .pill.ok {
+      background: var(--green-wash);
+      color: var(--green-ink);
+      border: 1px solid #a7f3d0;
+    }
+    .pill.grey {
+      background: var(--mist);
+      color: var(--body);
+      border: 1px solid var(--line-strong);
+    }
+    .pill.due {
+      background: var(--amber-wash);
+      color: var(--amber-on-wash);
+      border: 1px solid var(--amber-line);
+    }
+
+    #inv {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      top: 130px;
+      height: 340px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper);
+      box-shadow: 0 10px 30px -18px rgb(15 23 42 / 0.25);
+    }
+    #inv-month {
+      position: absolute;
+      left: 28px;
+      top: 30px;
+      color: var(--meta);
+    }
+    #inv-plan {
+      position: absolute;
+      left: 28px;
+      top: 60px;
+      font-size: 32px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    #inv-amt {
+      position: absolute;
+      left: 26px;
+      top: 150px;
+      font-size: 84px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    #inv-vat {
+      position: absolute;
+      left: 30px;
+      top: 248px;
+      font-size: 20px;
+      color: var(--meta);
+    }
+    #inv .pill {
+      top: 28px;
+    }
+    #stamp {
+      position: absolute;
+      left: 300px;
+      top: 214px;
+      padding: 4px 22px 6px;
+      border: 6px solid var(--amber-ink);
+      border-radius: 12px;
+      color: var(--amber-ink);
+      font-size: 70px;
+      line-height: 1;
+      opacity: 0;
+      transform-origin: 50% 50%;
+      mix-blend-mode: multiply;
+    }
+    .irow {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      height: 92px;
+      border-bottom: 1px solid var(--line);
+    }
+    .irow .m {
+      position: absolute;
+      left: 4px;
+      top: 30px;
+      font-size: 22px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .irow .a {
+      position: absolute;
+      left: 250px;
+      top: 30px;
+      font-size: 22px;
+      color: var(--body);
+      white-space: nowrap;
+    }
+    .irow .pill {
+      right: 2px;
+      top: 26px;
+    }
+
+    /* Scanner light (above the hero). */
+    #scan {
+      position: absolute;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--seal);
+      box-shadow: 0 0 18px 6px rgb(245 158 11 / 0.55);
+      opacity: 0;
+    }
+
+    /* ---------- the hero: the Din Firmaadresse mark ---------- */
+    #hero {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 0;
+      z-index: 10;
+    }
+    #hero-size {
+      position: absolute;
+      left: -52px;
+      top: -116px;
+      width: 104px;
+      height: 116px;
+      transform-origin: 52px 116px;
+    }
+    #hero-spin {
+      position: absolute;
+      inset: 0;
+      transform-origin: 52px 58px;
+    }
+    #hero-body {
+      position: absolute;
+      inset: 0;
+      transform-origin: 52px 116px;
+    }
+    #hero svg {
+      display: block;
+      overflow: visible;
+    }
+
+    #arrow {
+      position: absolute;
+      opacity: 0;
+    }
+    #hook {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 110px;
+      text-align: center;
+      font-size: 108px;
+      line-height: 0.98;
+      white-space: nowrap;
+    }
+    #hook .amber {
+      color: var(--amber-ink);
+    }
+    #cap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 60px;
+      text-align: center;
+    }
+    #cap-line {
+      font-size: 96px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    #cap-line .amber {
+      color: var(--amber-ink);
+    }
+    #cap-sub {
+      margin-top: 18px;
+      margin-top: 14px;
+      font-size: 34px;
+      font-weight: 600;
+      color: var(--body);
+      opacity: 0;
+    }
+  </style>
+
+  <div id="root" data-composition-id="film" data-width="1080" data-height="1080">
+    <!-- Shared gradients of the mark (apps/virtualoffice/public/icon.svg). -->
+    <svg width="0" height="0" style="position: absolute">
+      <defs>
+        <linearGradient id="dfNavy" x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#0F172A" />
+          <stop offset="1" stop-color="#1E293B" />
+        </linearGradient>
+        <linearGradient id="dfGold" x1="20" y1="20" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#FBBF24" />
+          <stop offset="1" stop-color="#D97706" />
+        </linearGradient>
+        <g id="dfMark">
+          <rect x="4" y="4" width="56" height="56" rx="12" fill="url(#dfNavy)" />
+          <rect x="5.5" y="5.5" width="53" height="53" rx="11" stroke="white" stroke-opacity="0.1" stroke-width="3" fill="none" />
+          <path d="M22 18h6a2 2 0 0 1 2 2v24a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2V20a2 2 0 0 1 2-2Z" fill="url(#dfGold)" />
+          <path d="M34 18h4c6.627 0 12 5.373 12 12 0 2.8-.95 5.38-2.56 7.42L34 26v-8Z" fill="white" fill-opacity="0.9" />
+          <path d="M34 46h4c6.627 0 12-5.373 12-12a11.950 11.950 0 0 0-1.840-6.320L34 38v8Z" fill="white" fill-opacity="0.6" />
+          <rect x="34" y="29" width="6" height="6" rx="1" fill="url(#dfGold)" />
+        </g>
+      </defs>
+    </svg>
+
+    <div id="cam">
+      <div id="win">
+        <div id="bar" data-layout-ignore>
+          <div class="dot3" style="left: 22px"></div>
+          <div class="dot3" style="left: 42px"></div>
+          <div class="dot3" style="left: 62px"></div>
+          <div id="tab">
+            <div id="tab-badge"></div>
+            <div id="tab-label">Log in</div>
+            <div id="tab-x">×</div>
+          </div>
+        </div>
+        <div id="urlrow" data-layout-ignore><div id="url"></div></div>
+
+        <div id="vp" data-layout-allow-overlap>
+          <!-- Placeholder -->
+          <div id="skel" data-layout-allow-overlap>
+            <div id="skel-card"></div>
+            <div class="bone" id="bone-0" style="top: 140px; width: 320px; height: 44px; border-radius: 10px"></div>
+            <div class="bone" id="bone-1" style="top: 228px; width: 544px; height: 70px; border-radius: 10px"></div>
+            <div class="bone" id="bone-2" style="top: 358px; width: 544px; height: 70px; border-radius: 10px"></div>
+            <div class="bone" id="bone-3" style="top: 480px; width: 544px; height: 84px; border-radius: 12px"></div>
+            <div id="skel-text"></div>
+          </div>
+
+          <!-- Login -->
+          <div id="login" data-layout-ignore>
+            <div id="login-eyebrow" class="label">Customer workspace</div>
+            <div id="login-h" class="outfit">Log in</div>
+            <div class="flabel" style="top: 196px">Email</div>
+            <div class="field" style="top: 228px"><span id="email"></span></div>
+            <div class="flabel" style="top: 326px">Password</div>
+            <div class="field" style="top: 358px; letter-spacing: 0.12em"><span id="pw"></span></div>
+            <div id="btn">Log in</div>
+          </div>
+
+          <!-- Dashboard -->
+          <div id="dash" data-layout-ignore>
+            <div id="side">
+              <div id="co">
+                <div id="co-name">Danskonlinemarketing ApS</div>
+              </div>
+              <div id="ws" class="label">Workspace</div>
+              <div id="nav-hi"></div>
+              <div id="nav-bar"></div>
+              <div class="nav" id="nav-0" style="top: 164px">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /></svg>
+                <span>Overview</span>
+              </div>
+              <div class="nav" id="nav-1" style="top: 228px">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+                <span>Mailbox</span>
+              </div>
+              <div class="nav" id="nav-2" style="top: 292px">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M8 13h8M8 17h5" /></svg>
+                <span>Address proof</span>
+              </div>
+              <div class="nav" id="nav-3" style="top: 356px">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /></svg>
+                <span>Billing</span>
+              </div>
+              <div class="nav" id="nav-4" style="top: 420px">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8.5" stroke-dasharray="3.2 2.4" /></svg>
+                <span>Settings</span>
+              </div>
+            </div>
+
+            <div id="main-h">
+              <div id="co-label" class="label">Danskonlinemarketing ApS</div>
+              <div id="welcome" class="outfit">Welcome back, Kris</div>
+              <div id="intro">Your mail, business address and account status — all in one place.</div>
+            </div>
+
+            <div id="status">
+              <div class="cell" id="cell-0" style="left: 0">
+                <div class="ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><path d="m6 12.5 4 4 8-9" /></svg></div>
+                <div class="k">Business address</div><div class="v">Active</div>
+              </div>
+              <div class="cell" id="cell-1" style="left: 192px">
+                <div class="ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><path d="m6 12.5 4 4 8-9" /></svg></div>
+                <div class="k">Identity</div><div class="v">Verified</div>
+              </div>
+              <div class="cell" id="cell-2" style="left: 384px">
+                <div class="ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3"><path d="m6 12.5 4 4 8-9" /></svg></div>
+                <div class="k">Subscription</div><div class="v">Silver</div>
+              </div>
+            </div>
+
+            <!-- Mailbox panel -->
+            <div class="panel" id="p-mail">
+              <div class="p-title outfit">My Mail</div>
+              <div class="p-sub">Your received mail and outgoing shipments</div>
+              <div id="empty">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+                <div id="empty-h">No mail yet</div>
+                <div id="empty-p">When we receive mail for you, it will appear here.</div>
+              </div>
+              <div class="mrow" id="row-0" style="top: 120px">
+                <div class="tile"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg></div>
+                <div class="who">Skattestyrelsen</div><div class="what">Physical letter · 2 pages</div>
+                <div class="pill ok">Scanned</div>
+              </div>
+              <div class="mrow" id="row-1" style="top: 250px">
+                <div class="tile"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg></div>
+                <div class="who">Erhvervsstyrelsen</div><div class="what">Physical letter · 1 page</div>
+                <div class="pill ok">Scanned</div>
+              </div>
+              <div class="mrow" id="row-2" style="top: 380px">
+                <div class="tile"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" /><path d="M12 22V12" /><path d="m3.3 7 7.703 4.734a2 2 0 0 0 2.004 0L20.7 7" /></svg></div>
+                <div class="who">Package</div><div class="what">Pickup or forwarding</div>
+                <div class="pill grey">Received</div>
+              </div>
+              <div class="mrow" id="row-3" style="top: 510px">
+                <div id="row3-wash" class="abs" style="inset: 0; background: var(--amber-wash); opacity: 0"></div>
+                <div class="tile" id="thumb" style="background: var(--mist); border-color: var(--line)">
+                  <svg width="48" height="48" viewBox="4 4 56 56" style="left: 7px; top: 7px"><use href="#dfMark" /></svg>
+                </div>
+                <div class="who">Dinfirmaadresse.dk</div><div class="what">Physical letter · 1 page</div>
+                <div class="pill ok">Scanned</div>
+              </div>
+            </div>
+
+            <!-- Billing panel -->
+            <div class="panel" id="p-bill">
+              <div class="p-title outfit">Your invoices</div>
+              <div class="p-sub">Download your official invoices as PDF.</div>
+              <div id="inv">
+                <div id="inv-month" class="label">November 2026</div>
+                <div id="inv-plan">Silver · monthly</div>
+                <div class="pill due" id="inv-pill">Unpaid</div>
+                <div id="inv-amt" class="outfit">239 DKK</div>
+                <div id="inv-vat">excl. VAT</div>
+                <div id="stamp" class="outfit">PAID</div>
+              </div>
+              <div class="irow" style="top: 500px">
+                <div class="m">October 2026</div><div class="a">239 DKK</div><div class="pill ok">Paid</div>
+              </div>
+              <div class="irow" style="top: 592px">
+                <div class="m">September 2026</div><div class="a">239 DKK</div><div class="pill ok">Paid</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="hero">
+        <div id="hero-size">
+          <div id="hero-spin">
+            <div id="hero-body">
+              <svg width="104" height="116" viewBox="0 0 104 116">
+                <g id="hero-legs" fill="#0F172A">
+                  <rect x="28" y="98" width="13" height="18" rx="3" />
+                  <rect x="63" y="98" width="13" height="18" rx="3" />
+                </g>
+                <g transform="scale(1.857) translate(-4 -4)">
+                  <use href="#dfMark" />
+                  <g id="hero-eyes">
+                    <circle cx="25.5" cy="11.2" r="4.4" fill="#ffffff" />
+                    <circle cx="38.5" cy="11.2" r="4.4" fill="#ffffff" />
+                    <g id="hero-pupils" fill="#0F172A">
+                      <circle cx="25.5" cy="11.4" r="2.2" />
+                      <circle cx="38.5" cy="11.4" r="2.2" />
+                    </g>
+                  </g>
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="scan"></div>
+    </div>
+
+    <svg id="arrow" width="40" height="64" viewBox="0 0 40 64">
+      <path d="M20 4v50M6 38l14 16 14-16" stroke="#d97706" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    </svg>
+    <div id="hook" class="outfit">
+      <div>We gave our logo</div>
+      <div class="amber">a job.</div>
+    </div>
+    <div id="cap">
+      <div id="cap-line" class="outfit"></div>
+      <div id="cap-sub">dinfirmaadresse.dk</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const DUR = 14;
+      const $ = (id) => document.getElementById(id);
+
+      // ---------- helpers ----------
+      const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+      const lerp = (a, b, u) => a + (b - a) * u;
+      const eio = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+      const eout = (u) => 1 - Math.pow(1 - u, 3);
+      const eback = (u) => { const c = 1.9; return 1 + (c + 1) * Math.pow(u - 1, 3) + c * Math.pow(u - 1, 2); };
+      function hash(x, y, seed) {
+        let h = (x * 374761393 + y * 668265263 + seed * 2246822519) | 0;
+        h = Math.imul(h ^ (h >>> 13), 1274126177);
+        return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+      }
+      function bounceOut(u) {
+        const n = 7.5625, d = 2.75;
+        if (u < 1 / d) return n * u * u;
+        if (u < 2 / d) return n * (u -= 1.5 / d) * u + 0.75;
+        if (u < 2.5 / d) return n * (u -= 2.25 / d) * u + 0.9375;
+        return n * (u -= 2.625 / d) * u + 0.984375;
+      }
+      function keys(list, t) {
+        if (t <= list[0][0]) return list[0].slice(1);
+        for (let i = 1; i < list.length; i++) {
+          if (t <= list[i][0]) {
+            const a = list[i - 1], b = list[i];
+            const u = eio((t - a[0]) / (b[0] - a[0]));
+            return a.slice(1).map((v, k) => lerp(v, b[k + 1], u));
+          }
+        }
+        return list[list.length - 1].slice(1);
+      }
+      function splitChars(el, text) {
+        el.innerHTML = "";
+        return [...text].map((c) => {
+          const s = document.createElement("span");
+          s.className = "ch";
+          s.textContent = c;
+          el.appendChild(s);
+          return s;
+        });
+      }
+      const show = (el, on) => (el.style.opacity = on ? 1 : 0);
+
+      // ---------- content ----------
+      const skelChars = splitChars($("skel-text"), "Loading…");
+      const emailChars = splitChars($("email"), "kontakt@dinfirmaadresse.dk");
+      const pwChars = splitChars($("pw"), "••••••••••");
+      const cap = $("cap-line");
+      const capWords = ["Your ", "post, ", "handled."].map((w, i) => {
+        const s = document.createElement("span");
+        s.className = "ch" + (i === 2 ? " amber" : "");
+        s.textContent = w;
+        cap.appendChild(s);
+        return s;
+      });
+      const rows = [0, 1, 2, 3].map((i) => $("row-" + i));
+      const cells = [0, 1, 2].map((i) => $("cell-" + i));
+      const navs = [0, 1, 2, 3, 4].map((i) => $("nav-" + i));
+
+      // ---------- the hero's path ----------
+      // Frame pixels. The page viewport starts at frame (70, 436).
+      const V = (x, y) => ({ x: 70 + x, y: 436 + y });
+      const TAB = { x: 193, y: 376 };
+      const SMALL = 0.212;
+      const PAGE = 0.8;
+      const CARD = V(470, 110);
+      const EMAIL = V(690, 338);
+      const PASS = V(690, 468);
+      const BTN = V(470, 590);
+      const NAV_MAIL = V(240, 284);
+      const ROW = [V(790, 570), V(790, 700), V(790, 830), V(790, 960)];
+      const NAV_BILL = V(240, 412);
+      const INV_TOP = V(720, 450);
+      const STAMP = V(700, 780);
+      const STATUS = V(845, 196);
+
+      // Frame 0 (the thumbnail): the mark stands big under the hook line; camera is at Z2 (330, 440, x2).
+      const HOOK = { x: 330, y: 650 };
+      const BIG = 2.5;
+      const HOPS = [
+        { t0: 0.95, t1: 1.4, a: HOOK, b: TAB, h: 60, s0: BIG, s1: SMALL, sOut: true },
+        { t0: 1.5, t1: 2.0, a: TAB, b: CARD, h: 300, s0: SMALL, s1: PAGE, crouch: 0.09 },
+        { t0: 2.1, t1: 2.5, a: CARD, b: EMAIL, h: 110 },
+        { t0: 2.6, t1: 3.0, a: EMAIL, b: PASS, h: 90 },
+        { t0: 3.5, t1: 4.0, a: PASS, b: BTN, h: 260, spin: -360 },
+        { t0: 4.1, t1: 4.5, a: BTN, b: NAV_MAIL, h: 170 },
+        { t0: 4.6, t1: 5.0, a: NAV_MAIL, b: ROW[0], h: 180 },
+        { t0: 5.1, t1: 5.5, a: ROW[0], b: ROW[1], h: 90 },
+        { t0: 5.6, t1: 6.0, a: ROW[1], b: ROW[2], h: 90 },
+        { t0: 6.1, t1: 6.5, a: ROW[2], b: ROW[3], h: 90 },
+        { t0: 7.6, t1: 8.0, a: ROW[3], b: NAV_BILL, h: 220 },
+        { t0: 8.1, t1: 8.5, a: NAV_BILL, b: INV_TOP, h: 150 },
+        { t0: 8.6, t1: 9.0, a: INV_TOP, b: STAMP, h: 240, spin: -360 },
+        { t0: 9.5, t1: 10.0, a: STAMP, b: STATUS, h: 200 },
+        { t0: 10.45, t1: 11.0, a: STATUS, b: TAB, h: 170, s0: PAGE, s1: SMALL, spin: 360 },
+      ];
+      const BLINKS = [0.5, 1.75, 3.25, 4.8, 7.12, 7.32, 9.3, 10.3, 12.4, 13.2];
+      // Pupil offsets in mark units.
+      const LOOK = [
+        [0, 0, 0], [1.05, 0, 0], [1.15, 1.6, 0.6], [1.35, 1.6, 0.6], [1.45, 0, 0],
+        [2.55, 0, 0], [2.65, -1.8, 1.2], [2.95, -1.8, 1.2], [3.05, -1.8, 1.2], [3.4, -1.8, 1.2], [3.5, 0, 0],
+        [6.55, 0, 0], [6.62, 0, -1.4], [6.98, 0, 1.4], [7.08, -2, 0.8], [7.5, -2, 0.8], [7.58, 0, 0],
+        [9.12, 0, 0], [9.22, -1.4, 1.5], [9.45, -1.4, 1.5], [9.52, 0, 0],
+        [10.05, 0, 0], [10.12, -1.8, 1.4], [10.4, -1.8, 1.4], [10.45, 0, 0],
+      ];
+
+      function heroAt(t) {
+        let x = HOOK.x, y = HOOK.y, gy = HOOK.y, size = BIG, rot = 0, sy = 1;
+        let lastLand = -9, next = null, air = null;
+        for (const h of HOPS) {
+          if (t >= h.t1) { lastLand = h.t1; x = h.b.x; y = gy = h.b.y; size = h.s1 ?? size; }
+          else if (t >= h.t0) { air = h; break; }
+          else { next = h; break; }
+        }
+        if (air) {
+          const u = (t - air.t0) / (air.t1 - air.t0);
+          x = lerp(air.a.x, air.b.x, u);
+          y = lerp(air.a.y, air.b.y, u) - air.h * 4 * u * (1 - u);
+          gy = lerp(air.a.y, air.b.y, eio(u));
+          size = lerp(air.s0 ?? size, air.s1 ?? size, air.sOut ? eout(u) : eio(u));
+          rot = (air.spin || 0) * eio(u);
+          sy *= 1 + 0.18 * Math.max(0, 1 - u / 0.35) + 0.1 * Math.max(0, (u - 0.75) / 0.25);
+        }
+        const d = t - lastLand;
+        const hard = lastLand === 4.0 || lastLand === 9.0;
+        if (d >= 0 && d < 0.7) sy *= 1 - (hard ? 0.38 : 0.28) * Math.exp(-d * 7) * Math.cos(d * 26);
+        if (next) {
+          const win = next.crouch || 0.1;
+          const a = next.t0 - t;
+          if (a > 0 && a < win) { const k = 1 - a / win; sy *= 1 - 0.24 * k * k; }
+        }
+        // Knocks against the tab, on the first two beats.
+        for (const b of [0.25, 0.75]) {
+          const q = t - b + 0.14;
+          if (q > 0 && q < 0.28) rot = 16 * Math.sin((q / 0.28) * Math.PI * 4) * (1 - q / 0.28);
+        }
+        // Shiver while the scanner passes.
+        if (t > 6.6 && t < 7.0) x += 1.6 * Math.sin(t * 140);
+        return { x, y, gy, size, rot, sy, sx: Math.pow(sy, -0.6) };
+      }
+
+      // ---------- camera ----------
+      // Square cut for X: the hero sits a little below the centre (screen y ~520-730).
+      function follow(h) {
+        return [540 + 0.12 * (h.x - 540), 0.75 * h.gy + 156, 1.0];
+      }
+      function camAt(t, h) {
+        const Z1 = [330, 620, 1.9];
+        const Z2 = [330, 440, 2.0];
+        const END = [540, 655, END_S];
+        let c;
+        if (t < 1.5) c = Z2.slice();
+        else if (t < 2.05) {
+          const f = follow(heroAt(2.05));
+          const u = eio((t - 1.5) / 0.55);
+          c = Z2.map((v, i) => lerp(v, f[i], u));
+        } else if (t < 11.0) c = follow(h);
+        else {
+          const f = follow(heroAt(11.0));
+          const u = eio(clamp((t - 11.0) / 0.8));
+          c = f.map((v, i) => lerp(v, END[i], u));
+        }
+        // Small shakes on the two hard stamps.
+        for (const s of [4.0, 9.0]) {
+          const d = t - s;
+          if (d > 0 && d < 0.35) c[1] += 7 * Math.sin(d * 70) * Math.exp(-d * 12);
+        }
+        return c;
+      }
+
+      // ---------- render one frame from time alone ----------
+      function render(t) {
+        const h = heroAt(t);
+        $("hero").style.transform = `translate(${h.x}px, ${h.y}px)`;
+        $("hero-size").style.transform = `scale(${h.size})`;
+        $("hero-spin").style.transform = `rotate(${h.rot}deg)`;
+        $("hero-body").style.transform = `scale(${h.sx}, ${h.sy})`;
+        const [lx, ly] = keys(LOOK, t);
+        $("hero-pupils").setAttribute("transform", `translate(${lx} ${ly})`);
+        let eye = 1;
+        if (t > 6.6 && t < 7.0) eye = 0.35; // squint under the scanner
+        for (const b of BLINKS) if (Math.abs(t - b) < 0.06) eye = 0.1;
+        $("hero-eyes").setAttribute("transform", `translate(0 11.2) scale(1 ${eye}) translate(0 -11.2)`);
+        $("hero-legs").style.opacity = t >= 11.0 ? 0 : 1;
+
+        // Hook: the line leaves as the browser rises in behind the hero.
+        const hk = clamp((t - 1.3) / 0.18);
+        $("hook").style.opacity = 1 - hk;
+        $("hook").style.transform = `translateY(${-50 * eout(hk)}px)`;
+        const wn = clamp((t - 0.9) / 0.35);
+        $("win").style.opacity = wn;
+        $("win").style.transform = `translateY(${70 * (1 - eout(wn))}px)`;
+
+        const [fx, fy, s] = camAt(t, h);
+        $("cam").style.transform = `translate(${540 - s * fx}px, ${540 - s * fy}px) scale(${s})`;
+
+        // Tab and address bar follow the page.
+        const label = t < 4.0 ? "Log in" : t < 4.5 ? "Overview" : t < 8.0 ? "My Mail" : t < 11.0 ? "Your invoices" : "Din Firmaadresse";
+        $("tab-label").textContent = label;
+        const path = t < 4.0 ? "/en/login" : t < 4.5 ? "/en/dashboard" : t < 8.0 ? "/en/dashboard/post" : "/en/dashboard/fakturaer";
+        $("url").innerHTML = `<b>dinfirmaadresse.dk</b>${path}`;
+        const bd = t - 11.0;
+        $("tab-badge").style.opacity = bd < 0 ? 0 : 1;
+        $("tab-badge").style.transform = `scale(${bd < 0 ? 0 : lerp(1.8, 1, eout(clamp(bd / 0.2)))})`;
+
+        // ----- placeholder shatters -----
+        const SH = 1.93, dt = t - SH;
+        skelChars.forEach((el, i) => {
+          if (dt <= 0) { el.style.transform = "none"; return; }
+          const vx = (hash(i, 1, 2) - 0.4) * 640;
+          const vy = -(220 + hash(i, 2, 2) * 420);
+          const r = (hash(i, 3, 2) - 0.5) * 900;
+          el.style.transform = `translate(${vx * dt}px, ${vy * dt + 1500 * dt * dt}px) rotate(${r * dt}deg)`;
+        });
+        ["skel-card", "bone-0", "bone-1", "bone-2", "bone-3"].forEach((id, k) => {
+          const el = $(id);
+          const dir = k % 2 ? 1 : -1;
+          el.style.transform = dt <= 0 ? "none"
+            : `translate(${dir * (60 + k * 40) * dt}px, ${-(80 + k * 30) * dt + 1500 * dt * dt}px) rotate(${dir * (12 + k * 6) * dt}deg)`;
+        });
+        $("skel").style.display = t > 3.2 ? "none" : "block";
+
+        // ----- login card -----
+        const ld = t - 2.0;
+        const loginOn = ld >= 0 && t < 4.45;
+        $("login").style.opacity = loginOn ? clamp(ld / 0.12) : 0;
+        $("login").style.transform = `scale(${ld < 0 ? 0.94 : lerp(0.94, 1, eback(clamp(ld / 0.3)))})`;
+        emailChars.forEach((el, i) => show(el, t >= 2.5 + i * 0.018));
+        pwChars.forEach((el, i) => show(el, t >= 3.0 + i * 0.035));
+        const bp = t - 4.0;
+        $("btn").style.transform = `scaleY(${bp < 0 ? 1 : 1 - 0.14 * Math.exp(-bp * 10) * Math.max(0, Math.cos(bp * 18))})`;
+        $("btn").style.background = bp >= 0 && bp < 0.3 ? "#1e293b" : "";
+
+        // ----- dashboard reveal: a circle from the button -----
+        const r = t < 4.0 ? 0 : eout(clamp((t - 4.0) / 0.45)) * 1500;
+        $("dash").style.clipPath = `circle(${r}px at 470px 630px)`;
+        $("dash").style.visibility = t < 4.0 ? "hidden" : "visible";
+
+        // Sidebar marker.
+        const NAVY = [164, 228, 356];
+        const MK = [[4.0, 0], [4.5, 0], [4.62, 1], [8.0, 1], [8.12, 2]];
+        const mk = keys(MK, t)[0];
+        const ny = mk <= 1 ? lerp(NAVY[0], NAVY[1], mk) : lerp(NAVY[1], NAVY[2], mk - 1);
+        $("nav-hi").style.top = `${ny}px`;
+        $("nav-bar").style.top = `${ny + 12}px`;
+        const active = t < 4.5 ? 0 : t < 8.0 ? 1 : 3;
+        navs.forEach((n, i) => n.classList.toggle("on", i === active));
+
+        // Status checks.
+        [10.0, 10.12, 10.24].forEach((ct, i) => {
+          const d = t - ct;
+          const ico = cells[i].querySelector(".ico");
+          const v = cells[i].querySelector(".v");
+          ico.style.background = d < 0 ? "" : "var(--green)";
+          ico.style.borderColor = d < 0 ? "" : "var(--green)";
+          ico.style.transform = `scale(${d < 0 ? 1 : lerp(1.5, 1, eout(clamp(d / 0.18)))})`;
+          ico.querySelector("svg").style.opacity = d < 0 ? 0 : 1;
+          v.style.opacity = d < 0 ? 0.25 : 1;
+        });
+
+        // ----- mailbox panel -----
+        const mailOn = t < 8.06;
+        $("p-mail").style.opacity = t < 8.0 ? 1 : 1 - clamp((t - 8.0) / 0.06);
+        $("p-mail").style.transform = `translateX(${t < 8.0 ? 0 : -30 * eout(clamp((t - 8.0) / 0.06))}px)`;
+        $("p-mail").style.visibility = mailOn ? "visible" : "hidden";
+        $("empty").style.opacity = t < 4.98 ? 1 : 0;
+        // Letters land with the hero, one per beat.
+        [5.0, 5.5, 6.0].forEach((lt, i) => {
+          const d = t - (lt - 0.12);
+          const row = rows[i];
+          row.style.opacity = d < 0 ? 0 : 1;
+          row.style.transform = `translateY(${d < 0 ? -90 : -90 * (1 - bounceOut(clamp(d / 0.3)))}px)`;
+          // The pill shows when the hero hops on.
+          const pd = t - (lt + 0.12);
+          const pill = row.querySelector(".pill");
+          pill.style.opacity = pd < 0 ? 0 : 1;
+          pill.style.transform = `scale(${pd < 0 ? 0.6 : lerp(1.3, 1, eout(clamp(pd / 0.15)))})`;
+        });
+        // Row 4: the hero gets scanned.
+        const r3 = rows[3];
+        r3.style.opacity = t < 6.5 ? 0 : 1;
+        const content = [...r3.querySelectorAll(".tile, .who, .what")];
+        content.forEach((el, k) => {
+          const d = t - (7.0 + k * 0.06);
+          el.style.opacity = d < 0 ? 0 : 1;
+          el.style.transform = `translateX(${d < 0 ? -14 : -14 * (1 - eout(clamp(d / 0.18)))}px)`;
+        });
+        $("row3-wash").style.opacity = t < 6.6 ? 0 : t < 7.0 ? 1 : Math.max(0, 1 - (t - 7.0) / 0.5);
+        const p3 = r3.querySelector(".pill"), pd3 = t - 7.7;
+        p3.style.opacity = pd3 < 0 ? 0 : 1;
+        p3.style.transform = `scale(${pd3 < 0 ? 0.6 : lerp(1.3, 1, eout(clamp(pd3 / 0.15)))})`;
+        // The scanner light sweeps down over the hero (frame coords of row 4).
+        const sc = $("scan");
+        const su = (t - 6.6) / 0.4;
+        const rowTop = 436 + 320 + 510, rowLeft = 70 + 302;
+        sc.style.opacity = su < 0 || su > 1 ? 0 : 1;
+        sc.style.left = `${rowLeft + 8}px`;
+        sc.style.width = `${578 - 16}px`;
+        sc.style.top = `${rowTop + 6 + 118 * eio(clamp(su))}px`;
+
+        // ----- billing panel -----
+        const bt = t - 8.06;
+        $("p-bill").style.visibility = bt < 0 ? "hidden" : "visible";
+        $("p-bill").style.opacity = clamp(bt / 0.08);
+        $("p-bill").style.transform = `translateX(${bt < 0 ? 40 : 40 * (1 - eout(clamp(bt / 0.2)))}px)`;
+        const paid = t >= 9.04;
+        const ip = $("inv-pill");
+        ip.textContent = paid ? "Paid" : "Unpaid";
+        ip.className = "pill " + (paid ? "ok" : "due");
+        const pq = t - 9.04;
+        ip.style.transform = `scale(${pq < 0 ? 1 : lerp(1.35, 1, eout(clamp(pq / 0.18)))})`;
+        const sd = t - 9.0;
+        const st = $("stamp");
+        st.style.opacity = sd < 0 ? 0 : 0.92;
+        st.style.transform = `rotate(-9deg) scale(${sd < 0 ? 1.6 : lerp(1.6, 1, eout(clamp(sd / 0.08)))})`;
+
+        // ----- end line -----
+        capWords.forEach((el, i) => {
+          const d = t - (11.55 + i * 0.15);
+          el.style.opacity = d < 0 ? 0 : 1;
+          el.style.transform = `translateY(${d < 0 ? 26 : 26 * (1 - eback(clamp(d / 0.3)))}px) scale(${d < 0 ? 0.9 : lerp(0.9, 1, eout(clamp(d / 0.2)))})`;
+        });
+        $("cap-sub").style.opacity = clamp((t - 11.9) / 0.2);
+        // Arrow drops onto the tab icon (frame position after the pull-back).
+        const tabF = { x: 540 + END_S * (TAB.x - 540), y: 540 + END_S * (TAB.y - 23 - 655) };
+        const ad = t - 12.35;
+        const ar = $("arrow");
+        ar.style.left = `${tabF.x - 20}px`;
+        ar.style.top = `${tabF.y - 64 - 6}px`;
+        ar.style.opacity = ad < 0 ? 0 : 1;
+        ar.style.transform = `translateY(${ad < 0 ? -40 : -40 * (1 - bounceOut(clamp(ad / 0.45)))}px)`;
+      }
+      const END_S = 0.8;
+
+      const clock = { t: 0 };
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(clock, { t: 0 }, { t: DUR, duration: DUR, ease: "none", onUpdate: () => render(clock.t) }, 0);
+      render(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["film"] = tl;
+    })();
+  </script>
+</template>
