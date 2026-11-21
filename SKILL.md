@@ -1,11 +1,11 @@
 ---
 name: brand-film
-description: Make a short, fun brand character film for social media (Reels, X, TikTok, LinkedIn) where a brand's own logo or favicon comes alive and builds the brand's real website or product screen, one beat-locked hop at a time, in the brand's real visual style. Opens on a scroll-stopping hook frame, ships a 9:16 master plus a 1:1 cut for X, with a synthesized score or effects-only sound. Renders HTML to MP4 locally with HyperFrames in seconds (no After Effects, no Blender, no GPU), then drafts the caption and a "how we made it" thread. Use when the user says /brand-film, asks for "a cool video for X", "a Reel for our product", "a launch clip", "make the logo build the site", "a mascot video like the favicon one", or wants another film in this style for any brand, site, product or feature.
+description: Make a short, fun brand character film for social media (Reels, X, TikTok, LinkedIn) where a brand's own logo or favicon comes alive and builds the brand's real website or product screen, one beat-locked hop at a time, in the brand's real visual style. Opens on a scroll-stopping hook frame, ships a 9:16 master plus a 1:1 cut for X, with a synthesized score or effects-only sound. Renders HTML to MP4 locally with HyperFrames in seconds (no After Effects, no Blender, no GPU), then drafts the caption and a "how we made it" thread. Can extend an existing cut with a cinematic reveal and match cuts, or revise a single shot. Use when the user says /brand-film, asks for "a cool video for X", "a Reel for our product", "a launch clip", "make the logo build the site", "a mascot video like the favicon one", or wants another film in this style for any brand, site, product or feature.
 ---
 
 # brand-film
 
-A 14 s character film: the brand's mark (favicon, logo, mascot) introduces itself big under a hook line, hops into its browser tab, breaks out, smashes a placeholder and builds the real page or product UI. Every hop lands on a beat and changes the screen. It ends on a punchline and the URL. Made as code, rendered in about 10 s on a laptop.
+The default is a 14 s character film: the brand's mark (favicon, logo, mascot) introduces itself big under a hook line, hops into its browser tab, breaks out, smashes a placeholder and builds the real page or product UI. Every hop lands on a beat and changes the screen. It ends on a punchline and the URL. Made as code, rendered in about 10 s on a laptop.
 
 Worked examples (read the one closest to the brief):
 
@@ -16,6 +16,8 @@ Worked examples (read the one closest to the brief):
 | `example-square/` | the same film cut for X | 1080×1080 | vector logo, hook opening | effects only |
 
 Read `references/method.md` before you write any code: it holds the engine, the layout math, the hook opening, the square cut and every lesson from both runs.
+
+For a requested cinematic ending or a reference-frame correction, read [Cinematic reveals and shot revisions](references/cinematic-reveals.md). A product control can carry the action into an illustrated or photographic scene. Let the requested beats set the duration. For revisions, start from the approved edit and carry its creative decisions forward.
 
 ## 1. Intake: interview first
 
@@ -47,7 +49,7 @@ Then reply with a short **beat sheet** (time → action → what changes on scre
 1. **Context.** Read the brand source. For a site, take a full-page screenshot (`"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --window-size=1280,2400 --screenshot=<scratch>/site.png <url>`) and a phone-width one (`--window-size=430,932`), and look at both. Note: grounds, accent colour, display and body fonts, signature details (dither, grids, shadows, corners). In a repo, read `DESIGN.md`, `PRODUCT.md`, the logo SVG, the i18n strings for real UI copy and the constants for prices.
 2. **Interview.** Section 1. Then the beat sheet.
 3. **Project.** In the session scratchpad: `DO_NOT_TRACK=1 npx hyperframes init <name> --skip-skills`. Always prefix HyperFrames commands with `DO_NOT_TRACK=1` (it sends telemetry otherwise). Download the brand fonts as `.woff2` into `assets/fonts/` and GSAP into `assets/lib/` (no CDN at render time). See method.md §Setup.
-4. **Beat sheet rules.** 120 BPM, beat = 0.5 s, 14 s = 28 beats. Frame 0 is the thumbnail: open on the **hook frame** (method.md §Hook opening): the hero big (~500-560 px tile, eyes open, legs on) under the bold two-line hook, accent colour on the last words. At ~0.95 s it shrinks into its tab while the browser rises in; at 1.5 s it breaks out. Every hop lands on a beat and changes something; a hop that changes nothing is cut. One surprise mid-film. The payoff lands hard (screen shake, the loudest sound). The hero returns to its tab, then the end line holds ≥ 2 s.
+4. **Default logo-film beat sheet.** 120 BPM, beat = 0.5 s, 14 s = 28 beats. Frame 0 is the thumbnail: open on the **hook frame** (method.md §Hook opening): the hero big (~500-560 px tile, eyes open, legs on) under the bold two-line hook, accent colour on the last words. At ~0.95 s it shrinks into its tab while the browser rises in; at 1.5 s it breaks out. Every hop lands on a beat and changes something; a hop that changes nothing is cut. One surprise mid-film. The payoff lands hard (screen shake, the loudest sound). The hero returns to its tab, then the end line holds ≥ 2 s.
 5. **Build the master.** Start from the example closest to the brief, copy its `index.html` and `compositions/film.html`, then replace the brand parts listed in method.md §What to swap. Keep the engine: one paused GSAP tween drives a pure `render(t)`. Rasterize the hero SVG into square cells if the brand is pixel-styled; keep the vector if not.
 6. **Check.** `DO_NOT_TRACK=1 npx hyperframes check` (vertical: default safe zones; square: `--safe-zone=standard`). Fix errors. Intended overlaps (debris, falling letters) get `data-layout-allow-overlap`; small browser-chrome text gets `data-layout-ignore`. The hook line stays ≥ 1.27 s; the closing line ≥ 2 s.
 7. **Look.** `npx hyperframes snapshot --at <0, 0.75, 1.0, 1.1, 1.2, 1.3, 1.45, every landing + 0.1 s, end> --no-end -o <scratch>/snaps` and read the contact sheet. Fix what you see (hero crossing the hook line, hero lost on a same-colour ground, text off-frame or under platform UI, hero covering copy, two panels visible at once, a name too wide for its box). Use `--zoom "<selector>"` to check tight text. Repeat until clean.
@@ -70,6 +72,5 @@ Feedback rounds are normal (the Din Firmaadresse film took five: names, music, h
 - A page change is a cut (≤ 0.08 s), never a slow crossfade: two readable panels at once look broken.
 - Never post or upload anything. Hand the user the files and the text.
 
-## 4. Credits
-
-The idea of a character building a real interface as code, with synthesized sound on one timeline, comes from the Clawd Motion Lab "No After Effects" prompt (Clawd building a motion graphic in an After Effects-style UI, Blender + HTML). This skill keeps it 2D, swaps the mascot for the brand's own logo, and adds the hook opening, the interview, the vertical and square cuts and the checks. Rendering is HyperFrames by HeyGen (Apache-2.0); animation is GSAP.
+## 4. 
+This skill keeps it 2D, swaps a mascot for the brand's own logo, and adds the hook opening, the interview, the vertical and square cuts and the checks. Rendering is HyperFrames by HeyGen (Apache-2.0); animation is GSAP.
