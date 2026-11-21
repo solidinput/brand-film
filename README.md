@@ -97,10 +97,6 @@ Both Din Firmaadresse cuts rebuild from `example-reels/` and `example-square/` a
 
 The logos and product screens in `example*/` and `media/` belong to Solidinput and Din Firmaadresse. They are here as worked examples; do not reuse them for your own films.
 
-## Want one made for you?
-
-[Solidinput](https://www.solidinput.eu) builds these films for software products.
-
 ## License
 
 MIT for the code and docs. See [LICENSE](LICENSE).
