@@ -72,6 +72,5 @@ Feedback rounds are normal (the Din Firmaadresse film took five: names, music, h
 - A page change is a cut (≤ 0.08 s), never a slow crossfade: two readable panels at once look broken.
 - Never post or upload anything. Hand the user the files and the text.
 
-## 4. Credits
-
-The idea of a character building a real interface as code, with synthesized sound on one timeline, comes from the Clawd Motion Lab "No After Effects" prompt (Clawd building a motion graphic in an After Effects-style UI, Blender + HTML). This skill keeps it 2D, swaps the mascot for the brand's own logo, and adds the hook opening, the interview, the vertical and square cuts and the checks. Rendering is HyperFrames by HeyGen (Apache-2.0); animation is GSAP.
+## 4. 
+This skill keeps it 2D, swaps a mascot for the brand's own logo, and adds the hook opening, the interview, the vertical and square cuts and the checks. Rendering is HyperFrames by HeyGen (Apache-2.0); animation is GSAP.
